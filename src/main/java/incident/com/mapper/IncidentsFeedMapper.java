@@ -14,10 +14,7 @@ public interface IncidentsFeedMapper {
 
 	IncidentsFeedResp toResponse(IncidentsFeedCollection collection);
 	
-	
-	
     @Mapping( target="id", ignore = true)
-	@Mapping( target="createdBy", ignore = true)
 	IncidentsFeedCollection toCollection(IncidentsFeedReq collection);
 	
 	

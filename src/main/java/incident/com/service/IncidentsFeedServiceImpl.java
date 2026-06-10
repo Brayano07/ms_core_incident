@@ -7,7 +7,10 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import incident.com.dto.IncidentsFeedReq;
+import incident.com.dto.IncidentsFeedResp;
 import incident.com.exception.ResourceNotFoundException;
+import incident.com.mapper.IncidentsFeedMapper;
 import incident.com.model.IncidentsFeedCollection;
 import incident.com.repository.IncidentsFeedRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +26,18 @@ public class IncidentsFeedServiceImpl implements IncidentsFeedService{
 	@Autowired
 	private IncidentsFeedRepository  incidentsFeedRepository;
 	
+	@Autowired
+	private IncidentsFeedMapper  incidentsFeedMapper;
+	
 	@Override
-	public Mono<IncidentsFeedCollection> createIncidentsFeed(IncidentsFeedCollection incident) {
+	public Mono<IncidentsFeedCollection> createIncidentsFeed(IncidentsFeedReq incident) {
 		
-		incident.setId(UUID.randomUUID());
 		
-		return this.incidentsFeedRepository.save(incident);
+		IncidentsFeedCollection collection = incidentsFeedMapper.toCollection(incident);
+		
+		collection.setId(UUID.randomUUID());
+		
+		return this.incidentsFeedRepository.save(collection);
 		
 		/*return this.incidentsFeedRepository.findById(UUID.fromString(inicident.getIncidentUuid()))
 				.switchIfEmpty(Mono.error(new ResourceNotFoundException("Inicident not found")))	
@@ -39,9 +48,11 @@ public class IncidentsFeedServiceImpl implements IncidentsFeedService{
 	}
 
 	@Override
-	public Flux<IncidentsFeedCollection> readAll(Integer page, Integer size) {
-		return this.incidentsFeedRepository.findAll()
-				.skip( (long) page * size).take(size);
+	public Flux<IncidentsFeedResp> readAll(Integer page, Integer size) {
+		
+		return  this.incidentsFeedMapper.toResponseFlux(this.incidentsFeedRepository.findAll()
+				        .skip((long) (page - 1) * size)
+				        .take(size));
 	}
 
 }
